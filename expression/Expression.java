@@ -39,7 +39,7 @@ public class Expression {
 
         System.out.println("Parentheses simplified: " + s.toString());
 
-        // Distribution TODO
+        // Distribution TODO 
 
 
         // Second: parse terms
