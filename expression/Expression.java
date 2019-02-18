@@ -38,8 +38,7 @@ public class Expression {
         }
 
         System.out.println("Parentheses simplified: " + s.toString());
-
-        // Distribution TODO 
+        // Distribution TODO
 
 
         // Second: parse terms
@@ -53,12 +52,17 @@ public class Expression {
 
         parsed = parseTermsAndSymbols(s.toString());
         for (Object o : parsed) {
-            if (!o.getClass().equals(Character.class)) terms.add(Term.toTerm(o));
+            if (!o.getClass().equals(Character.class)) terms.add((Term) o); // TODO add terms
         }
 
         System.out.println("OUT: " + termsToString(terms));
     }
 
+    /**
+     * Returns a map of matching opening and closing parentheses. The returned map excludes parenthetical expressions that are exponents, because those will be evaluated later
+     * @param e = the expression in which to search for matching parentheses
+     * @return = a map of the indices of matching parentheses in the expression e. This map excludes parentheses that delineate exponents
+     */
     private HashMap<Integer, Integer> parseParentheses(String e) {
         HashMap<Integer, Character> indices = new HashMap<>();
 

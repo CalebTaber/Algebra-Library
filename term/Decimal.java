@@ -93,7 +93,6 @@ public class Decimal extends Term {
             }
         }
 
-        System.out.println("CONSTANT");
         // Apply exponent if possible
         if (exponent.size() == 1) { // If there is only one term as the exponent
             Term exp = exponent.get(0);

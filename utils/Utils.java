@@ -21,7 +21,7 @@ public class Utils {
 
         for (Term t : terms) {
             if (terms.indexOf(t) == 0) s.append(t.toString());
-            if (t.toString().startsWith("-")) s.append(t.toString());
+            else if (t.toString().startsWith("-")) s.append(t.toString());
             else s.append("+").append(t.toString());
         }
 

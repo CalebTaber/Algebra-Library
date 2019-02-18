@@ -48,6 +48,7 @@ public class Fraction extends Term {
     }
 
     public static boolean isFraction(String e) {
+        System.out.println("isFraction: " + e);
         if(!e.contains("/")) return false;
 
         for (int i = 0, p = 0, j = 0; i < e.length(); i++) {
