@@ -1,1 +1,1 @@
-An algebra library written in Java. Not fully-functional yet.
+An algebra library written in Java. Not fully-functional yet. 
