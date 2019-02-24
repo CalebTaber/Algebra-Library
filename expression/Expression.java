@@ -1,9 +1,11 @@
 package expression;
 
+import term.Decimal;
 import term.Term;
 
 import java.util.*;
 
+import static arithmetic.Arithmetic.multiply;
 import static utils.Utils.indicesOf;
 import static utils.Utils.parseTermsAndSymbols;
 import static utils.Utils.termsToString;
@@ -46,7 +48,7 @@ public class Expression {
         ArrayList<Object> parsed = parseTermsAndSymbols(e);
 
         // Third: simplify multiplication and division
-
+        System.out.println("FUUUK: ");
 
         // Fourth: simplify addition and subtraction
 

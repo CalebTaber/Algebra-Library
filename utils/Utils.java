@@ -17,6 +17,7 @@ public class Utils {
 
     /** Returns the string equivalent of the given Term list **/
     public static String termsToString(ArrayList<Term> terms) {
+        System.out.println(terms);
         StringBuilder s = new StringBuilder();
 
         for (Term t : terms) {

@@ -19,6 +19,12 @@ public class Decimal extends Term {
     private ArrayList<Term> exponent;
     private HashMap<Character, ArrayList<Term>> variables;
 
+    public Decimal(BigDecimal val, ArrayList<Term> exp, HashMap<Character, ArrayList<Term>> vars) {
+        value = val;
+        exponent = exp;
+        variables = vars;
+    }
+
     public Decimal(String e) {
         parse(e);
     }
@@ -33,8 +39,14 @@ public class Decimal extends Term {
 
             if (value == null) { // If the value has not been set yet
                 if (Character.isLetter(c)) {
-                    if (i == 0) value = new BigDecimal(1); // If there is no stated coefficient (implying 1 as a coefficient)
-                    else if (i == 1 && e.charAt(0) == '-') value = new BigDecimal(-1); // If the value is -1, stated by a single '-' before the variables
+                    if (i == 0) { // If there is no stated coefficient (implying 1 as a coefficient)
+                        if (atEnd(i, e)) { // If the term is a single variable with no exponent. Ex: x
+                            value = new BigDecimal(1);
+                            variables.put(c, termToList(Decimal.ONE));
+                        }
+                        value = new BigDecimal(1); // If the term has no defined coefficient
+                    }
+                    else if (i == 1 && e.charAt(0) == '-') value = new BigDecimal(-1); // If the coefficient is -1, stated by a single '-' before the variables
                     else {
                         value = new BigDecimal(e.substring(j, i));
                         i--; // Decrement i so that variable parsing can occur 5x^(2) -> i == 1; next cycle of loop, i == 2, and variable parsing cannot begin
@@ -72,21 +84,20 @@ public class Decimal extends Term {
                     }
                 }
             } else { // Parse the variables
-                // System.out.println("PV: " + e + ", " + i);
                 if (Character.isLetter(c)) { // When a variable is encountered, seek ahead and parse the exponent. Then, move on to the next variable
+                    // System.out.println("PV: " + e + ", " + i);
+                    if (atEnd(i, e)) variables.put(c, termToList(Decimal.ONE)); // If the variable is to the first power and has no caret. Ex: 3x
                     for (int k = i + 3, p = 1; k < e.length(); k++) { // Add 3 to k so that it is at the beginning of the exponent. x^(-1) -> i == 0, k == 3
                         char r = e.charAt(k);
 
                         if (r == '(') p++;
-                        else if (r == ')') {
-                            p--;
-                            if (p == 0) {
-                                // System.out.println("VAR EXPONENT: " + e.substring(i + 3, k));
-                                variables.put(c, new Expression(e.substring(i + 3, k)).getTerms()); // When the end of the exponent is found, add it and the variable to the map
-                                i = k;
-                                j = i + 1;
-                                break;
-                            }
+                        else if (r == ')') p--;
+                        if (p == 0) {
+                            System.out.println("VAR EXPONENT: " + e.substring(i + 3, k));
+                            variables.put(c, new Expression(e.substring(i + 3, k)).getTerms()); // When the end of the exponent is found, add it and the variable to the map
+                            i = k;
+                            j = i + 1;
+                            break;
                         }
                     }
                 }
@@ -120,10 +131,9 @@ public class Decimal extends Term {
         StringBuilder s = new StringBuilder();
         s.append(value.toString()); // Add value
         if (!exponent.isEmpty()) s.append("^(").append(termsToString(exponent)).append(")"); // Add exponent
-
         if (!variables.isEmpty()) { // Add variables
             for (char c : variables.keySet()) {
-                s.append(c).append("^(").append(variables.get(c)).append(")");
+                s.append(c).append("^(").append(termsToString(variables.get(c))).append(")");
             }
         }
 
