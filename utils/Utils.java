@@ -17,7 +17,6 @@ public class Utils {
 
     /** Returns the string equivalent of the given Term list **/
     public static String termsToString(ArrayList<Term> terms) {
-        System.out.println(terms);
         StringBuilder s = new StringBuilder();
 
         for (Term t : terms) {
@@ -120,6 +119,16 @@ public class Utils {
     public static boolean isConstant(String s) {
         for (char c : s.toCharArray()) {
             if (!Character.isDigit(c) && c != '/') return false;
+        }
+
+        return true;
+    }
+
+    /** Compares two arraylists of terms. Returns true if they contain the same terms. Returns false otherwise */
+    public static boolean termsAreEqual(ArrayList<Term> one, ArrayList<Term> two) {
+        if (one.size() != two.size()) return false;
+        for (Term t : one) {
+            if (!two.contains(t)) return false;
         }
 
         return true;

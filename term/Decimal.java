@@ -30,7 +30,7 @@ public class Decimal extends Term {
     }
 
     private void parse(String e) {
-        System.out.println("PARSE INPUT: " + e);
+        System.out.println("Decimal PARSE INPUT: " + e);
         exponent = new ArrayList<>();
         variables = new HashMap<>();
 

@@ -48,11 +48,10 @@ public class Expression {
         ArrayList<Object> parsed = parseTermsAndSymbols(e);
 
         // Third: simplify multiplication and division
-        System.out.println("FUUUK: ");
 
         // Fourth: simplify addition and subtraction
 
-        parsed = parseTermsAndSymbols(s.toString());
+        // parsed = parseTermsAndSymbols(s.toString()); TODO UNCOMMENT
         for (Object o : parsed) {
             if (!o.getClass().equals(Character.class)) terms.add((Term) o); // TODO add terms
         }

@@ -21,14 +21,15 @@ public class Fraction extends Term {
 
     private void parse(String e) {
         // Find middle division symbol
+        System.out.println("Fraction PARSE INPUT: " + e);
         ArrayList<Integer> div = indicesOf(e, '/');
         int d = div.size() / 2;
         // Parse numerator and denominator, and simplify them
         String num = termsToString(new Expression(e.substring(0, div.get(d))).getTerms());
-        String denom = termsToString(new Expression(e.substring(div.get(d) + 1, e.length())).getTerms());
+        String denom = termsToString(new Expression(e.substring(div.get(d) + 1)).getTerms());
 
         // Check if compound fraction   (3x+2)/7 OR 3x/(7-y)
-        if (div.size() == 1 && (e.contains("+") || (e.substring(1, e.length()).contains("-")))) { // If there is one division symbol and there is addition or subtraction
+        if (div.size() == 1 && (e.contains("+") || (e.substring(1).contains("-")))) { // If there is one division symbol and there is addition or subtraction
             numerator = parseTerms(num);
             denominator = parseTerms(denom);
         } else { // If it is a complex fraction OR a simple fraction
@@ -48,7 +49,6 @@ public class Fraction extends Term {
     }
 
     public static boolean isFraction(String e) {
-        System.out.println("isFraction: " + e);
         if(!e.contains("/")) return false;
 
         for (int i = 0, p = 0, j = 0; i < e.length(); i++) {
