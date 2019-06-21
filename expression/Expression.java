@@ -5,6 +5,7 @@ import term.Term;
 
 import java.util.*;
 
+import static arithmetic.Arithmetic.add;
 import static arithmetic.Arithmetic.multiply;
 import static utils.Utils.indicesOf;
 import static utils.Utils.parseTermsAndSymbols;
@@ -53,8 +54,12 @@ public class Expression {
 
         // parsed = parseTermsAndSymbols(s.toString()); TODO UNCOMMENT
         for (Object o : parsed) {
-            if (!o.getClass().equals(Character.class)) terms.add((Term) o); // TODO add terms
+            if (!o.getClass().equals(Character.class)) terms.add((Term) o);
         }
+        for (int i = 1; i < terms.size(); i++) {
+            terms.set(0, add(terms.get(0), terms.get(i)));
+        }
+        terms.removeAll(terms.subList(1, terms.size()));
 
         System.out.println("OUT: " + termsToString(terms));
     }
