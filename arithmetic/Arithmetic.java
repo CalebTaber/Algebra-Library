@@ -109,7 +109,7 @@ public class Arithmetic {
             }
         }
 
-        return termToList(Decimal.ERROR);
+        return distributed;
     }
 
     public static ArrayList<Term> LCD(Term one, Term two) {

@@ -69,7 +69,7 @@ public class Utils {
             else if (c == ')') p--;
 
             if (p == 0) { // Make sure that the exponent of a term is not parsed separately
-                if (atEnd(i, e)) parsed.add(e.substring(j, e.length())); // If the end of the string is reached, add the final term to the list
+                if (atEnd(i, e)) parsed.add(e.substring(j)); // If the end of the string is reached, add the final term to the list
 
                 // Parse the terms when an arithmetic operator is encountered
                 switch (c) {

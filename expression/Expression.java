@@ -36,23 +36,28 @@ public class Expression {
 
         // Simplify inside
         StringBuilder s = new StringBuilder(e);
+        System.out.println(parentheses.size() + ", " + parentheses.keySet().size());
         for (int k : parentheses.keySet()) {
-            s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k, parentheses.get(k))).toString());
+            s.replace(k, parentheses.get(k) + 1, new Expression(s.substring(k + 1, parentheses.get(k))).toString()); // TODO REMOVE WHEN BELOW LINE IS UNCOMMENTED
+            // s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k + 1, parentheses.get(k))).toString()); TODO UNCOMMENT
         }
 
         System.out.println("Parentheses simplified: " + s.toString());
+        parentheses = parseParentheses(s.toString());
         // Distribution TODO
+        // Find left and right multiplicands and multiply them. Then, multiply that by the expression
 
 
         // Second: parse terms
-        System.out.println("Parse Terms: " + e);
-        ArrayList<Object> parsed = parseTermsAndSymbols(e);
+        System.out.println("Parse Terms: " + s.toString());
+        ArrayList<Object> parsed = parseTermsAndSymbols(s.toString());
 
         // Third: simplify multiplication and division
 
         // Fourth: simplify addition and subtraction
 
         // parsed = parseTermsAndSymbols(s.toString()); TODO UNCOMMENT
+        System.out.println("Before Addition: " + s.toString());
         for (Object o : parsed) {
             if (!o.getClass().equals(Character.class)) terms.add((Term) o);
         }
@@ -77,6 +82,7 @@ public class Expression {
 
         // Add opening parentheses to the map
         for (int i = 0; i < open.size(); i++) {
+            System.out.println("asd: " + i);
             indices.put(open.get(i), '(');
             indices.put(close.get(i), ')');
         }
@@ -85,7 +91,7 @@ public class Expression {
         HashMap<Integer, Integer> parentheses = new HashMap<>();
 
         System.out.println("INDICES: " + indices.keySet());
-        if (parentheses.isEmpty()) return parentheses; // If the map is empty, don't sort it; just return the empty map
+        if (indices.isEmpty()) return parentheses; // If the map is empty, don't sort it; just return the empty map
 
         // Sort set
         Set<Integer> keys = new LinkedHashSet<>();

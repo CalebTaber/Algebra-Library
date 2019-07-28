@@ -129,6 +129,7 @@ public class Decimal extends Term {
 
     public String toString() {
         StringBuilder s = new StringBuilder();
+        System.out.println(value == null);
         s.append(value.toString()); // Add value
         if (!exponent.isEmpty()) s.append("^(").append(termsToString(exponent)).append(")"); // Add exponent
         if (!variables.isEmpty()) { // Add variables
