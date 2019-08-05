@@ -13,6 +13,8 @@ import static utils.Utils.*;
 
 public class Arithmetic {
 
+    public static final String OPERATORS = "+-*/%";
+
     public static Term add(Term addend, Term augend) {
         // It is assumed that both terms have the same exponents/variables and that two fractions have the same denominators
         boolean aDec = addend.ID().equals("decimal");

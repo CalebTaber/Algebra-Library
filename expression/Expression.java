@@ -5,11 +5,8 @@ import term.Term;
 
 import java.util.*;
 
-import static arithmetic.Arithmetic.add;
-import static arithmetic.Arithmetic.multiply;
-import static utils.Utils.indicesOf;
-import static utils.Utils.parseTermsAndSymbols;
-import static utils.Utils.termsToString;
+import static arithmetic.Arithmetic.*;
+import static utils.Utils.*;
 
 public class Expression {
 
@@ -36,7 +33,6 @@ public class Expression {
 
         // Simplify inside
         StringBuilder s = new StringBuilder(e);
-        System.out.println(parentheses.size() + ", " + parentheses.keySet().size());
         for (int k : parentheses.keySet()) {
             s.replace(k, parentheses.get(k) + 1, new Expression(s.substring(k + 1, parentheses.get(k))).toString()); // TODO REMOVE WHEN BELOW LINE IS UNCOMMENTED
             // s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k + 1, parentheses.get(k))).toString()); TODO UNCOMMENT
@@ -46,7 +42,24 @@ public class Expression {
         parentheses = parseParentheses(s.toString());
         // Distribution TODO
         // Find left and right multiplicands and multiply them. Then, multiply that by the expression
+        while (!parentheses.isEmpty()) {
+            int lbound, rbound, start, end;
 
+            start = (int) parentheses.keySet().toArray()[0];
+            end = (int) parentheses.values().toArray()[0];
+
+            StringBuilder leftDistSB = new StringBuilder(s.toString().substring(0, start));
+            leftDistSB.reverse();
+            String leftDist = scanDistributand(leftDistSB.toString(), true);
+            lbound = start - leftDist.length();
+
+            String rightDist = scanDistributand(s.toString().substring(end), false);
+            rbound = end + rightDist.length();
+
+            s.replace(lbound, rbound, termsToString(distribute(distribute(new Expression(leftDist).getTerms(), new Expression(rightDist).getTerms()), parseTerms(s.substring(start, end)))));
+
+            parentheses = parseParentheses(s.toString());
+        }
 
         // Second: parse terms
         System.out.println("Parse Terms: " + s.toString());
@@ -69,6 +82,29 @@ public class Expression {
         System.out.println("OUT: " + termsToString(terms));
     }
 
+    private String scanDistributand(String expression, boolean left) {
+        StringBuilder distributand = new StringBuilder("");
+
+        for (int i = 0, p = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+
+            if (c == '(') p++;
+            if (c == ')') p--;
+
+            if (i != 0 && p == 0 && c == ')' && !atEnd(i, expression) && expression.charAt(i + 1) == '(') continue; // If c == ')' and there's an adjacent parenthetical expression, include it in the distributand
+
+            if (i == 0 && c == '-') continue; // If the distributand is negative, don't identify the negating sign as a subtraction symbol
+
+            if (OPERATORS.contains(String.valueOf(c)) && p == 0) {
+                distributand = new StringBuilder(expression.substring(0, i));
+                break;
+            } else if (atEnd(i, expression)) distributand = new StringBuilder(expression);
+        }
+
+        if (left) distributand.reverse(); // If left, reverse distributand, then return new Expression
+        return distributand.toString();
+    }
+
     /**
      * Returns a map of matching opening and closing parentheses. The returned map excludes parenthetical expressions that are exponents, because those will be evaluated later
      * @param e = the expression in which to search for matching parentheses
@@ -82,7 +118,6 @@ public class Expression {
 
         // Add opening parentheses to the map
         for (int i = 0; i < open.size(); i++) {
-            System.out.println("asd: " + i);
             indices.put(open.get(i), '(');
             indices.put(close.get(i), ')');
         }
