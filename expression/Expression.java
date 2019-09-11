@@ -74,12 +74,48 @@ public class Expression {
         for (Object o : parsed) {
             if (!o.getClass().equals(Character.class)) terms.add((Term) o);
         }
-        for (int i = 1; i < terms.size(); i++) {
-            terms.set(0, add(terms.get(0), terms.get(i)));
-        }
-        terms.removeAll(terms.subList(1, terms.size()));
 
-        System.out.println("OUT: " + termsToString(terms));
+        ArrayList<ArrayList<Term>> addLists = new ArrayList<>();
+
+        // Sort the terms by their variables
+        for (Term t : terms) {
+            if (addLists.isEmpty()) {
+                ArrayList<Term> newList = new ArrayList<>();
+                newList.add(t);
+                addLists.add(newList);
+            }
+
+            ArrayList<ArrayList<Term>> tmp = new ArrayList<>();
+            for (ArrayList<Term> l : addLists) {
+                if (l.get(0).getVariables().equals(t.getVariables())) l.add(t);
+                else {
+                    ArrayList<Term> newList = new ArrayList<>();
+                    newList.add(t);
+                    tmp.add(newList);
+                }
+            }
+
+            addLists.addAll(tmp);
+        }
+        System.out.println("ADD 1");
+
+        // Add lists
+        for (ArrayList<Term> l : addLists) {
+            System.out.println(termsToString(l));
+            for (int i = 1; i < l.size(); i++) {
+                l.set(0, add(l.get(0), l.get(i)));
+            }
+        }
+
+        System.out.println("ADD 2");
+
+        // Add terms to term list
+        terms = new ArrayList<>();
+        for (ArrayList<Term> list : addLists) {
+            terms.add(list.get(0));
+        }
+
+        System.out.println("AFTER ADDITION: " + termsToString(terms));
     }
 
     private String scanDistributand(String expression, boolean left) {
@@ -93,7 +129,7 @@ public class Expression {
 
             if (i != 0 && p == 0 && c == ')' && !atEnd(i, expression) && expression.charAt(i + 1) == '(') continue; // If c == ')' and there's an adjacent parenthetical expression, include it in the distributand
 
-            if (i == 0 && c == '-') continue; // If the distributand is negative, don't identify the negating sign as a subtraction symbol
+            if (i == 0 && (c == '-' || c == '*')) continue; // Skip over an adjacent '-' or '*'
 
             if (OPERATORS.contains(String.valueOf(c)) && p == 0) {
                 distributand = new StringBuilder(expression.substring(0, i));

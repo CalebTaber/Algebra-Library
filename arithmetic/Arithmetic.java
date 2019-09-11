@@ -103,6 +103,7 @@ public class Arithmetic {
     }
 
     public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
+        System.out.println("DIST IN: " + termsToString(distributors) + " | " + termsToString(distributand));
         ArrayList<Term> distributed = new ArrayList<>();
 
         for (int i = 0; i < distributors.size(); i++) {
@@ -111,6 +112,7 @@ public class Arithmetic {
             }
         }
 
+        System.out.println(termsToString(distributed));
         return distributed;
     }
 
