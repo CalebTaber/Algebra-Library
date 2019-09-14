@@ -9,22 +9,28 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static utils.Utils.termToList;
-import static utils.Utils.termsToString;
+import static utils.Utils.*;
 
 public class Arithmetic {
 
+    public static final String OPERATORS = "+-*/%";
+
     public static Term add(Term addend, Term augend) {
-        // It is assumed that both terms have the same exponents/variables
-        boolean aDec = addend.getClass().equals(Decimal.class);
-        boolean bDec = augend.getClass().equals(Decimal.class);
+        // It is assumed that both terms have the same exponents/variables and that two fractions have the same denominators
+        boolean aDec = addend.ID().equals("decimal");
+        boolean bDec = augend.ID().equals("decimal");
 
         if (aDec && bDec) {
             return new Decimal(((Decimal) addend).getValue().add(((Decimal) augend).getValue()), ((Decimal) addend).getExponent(), ((Decimal) addend).getVariables());
         } else if ((aDec && !bDec) || (!aDec && bDec)) {
-
-        } else if (!aDec && !bDec) {
-
+            ArrayList<Term> numerator, denominator;
+            if (addend.ID().equals("decimal")) {
+                numerator = new Expression(termsToString(distribute(termToList(addend), ((Fraction) augend).getDenominator())) + "+(" + termsToString(((Fraction) augend).getNumerator()) + ")").getTerms();
+                return new Fraction(numerator, ((Fraction) augend).getDenominator());
+            } else {
+                numerator = new Expression(termsToString(distribute(termToList(augend), ((Fraction) addend).getDenominator())) + "+(" + termsToString(((Fraction) addend).getNumerator()) + ")").getTerms();
+                return new Fraction(numerator, ((Fraction) addend).getDenominator());
+            }
         }
 
         return Decimal.ERROR;
@@ -88,20 +94,43 @@ public class Arithmetic {
     }
 
     public static Term divide(Term dividend, Term divisor) {
-        return Decimal.ONE;
+        return multiply(dividend, reciprocate(divisor));
     }
 
     public static Term reciprocate(Term t) {
-        return Decimal.ONE;
+        if (t.ID().equals("decimal")) return new Fraction(termToList(Decimal.ONE), termToList(t));
+        else return new Fraction(((Fraction) t).getDenominator(), ((Fraction) t).getNumerator());
     }
 
     public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
-        return termToList(Decimal.ERROR);
+        System.out.println("DIST IN: " + termsToString(distributors) + " | " + termsToString(distributand));
+        ArrayList<Term> distributed = new ArrayList<>();
+
+        for (int i = 0; i < distributors.size(); i++) {
+            for (int o = 0; o < distributand.size(); o++) {
+                distributed.add(multiply(distributors.get(i), distributand.get(o)));
+            }
+        }
+
+        System.out.println(termsToString(distributed));
+        return distributed;
     }
 
-    public static Term lcd(Term one, Term two) {
+    public static ArrayList<Term> LCD(Term one, Term two) {
+        boolean oneDec = one.ID().equals("decimal");
+        boolean twoDec = two.ID().equals("decimal");
 
-        return Decimal.ERROR;
+        if (oneDec && twoDec) return termToList(Decimal.ONE); // If both terms are decimals, the LCD is 1
+        else if ((oneDec && !twoDec) || (!oneDec && twoDec)) return (oneDec) ? ((Fraction) two).getDenominator() : ((Fraction) one).getDenominator(); // If only one of the terms is a fraction, the LCD is the denominator of the fraction
+        else if (!oneDec && !twoDec) { // If both terms are fractions
+            ArrayList<Term> dOne = ((Fraction) one).getDenominator();
+            ArrayList<Term> dTwo = ((Fraction) two).getDenominator();
+
+            if (termsAreEqual(dOne, dTwo)) return termToList(Decimal.ONE);
+            else return distribute(dOne, dTwo);
+        }
+
+        return termToList(Decimal.ERROR);
     }
 
     public static int compare(Term a, Term b) {

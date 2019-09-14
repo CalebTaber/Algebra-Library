@@ -1,5 +1,8 @@
 package term;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public abstract class Term {
 
     public String ID() {
@@ -13,6 +16,10 @@ public abstract class Term {
         else if (Fraction.isFraction(o.toString())) return new Fraction(o.toString());
 
         return Decimal.ERROR;
+    }
+
+    public HashMap<Character, ArrayList<Term>> getVariables() {
+        return new HashMap<>();
     }
 
 }
