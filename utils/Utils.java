@@ -73,6 +73,7 @@ public class Utils {
 
                 // Parse the terms when an arithmetic operator is encountered
                 switch (c) {
+                    case '*':
                     case '+':
                         parsed.add(e.substring(j, i));
                         parsed.add(c);
@@ -92,18 +93,13 @@ public class Utils {
                             j = i; // Do not move j past i, because the subtraction symbol will be included in the next term
                         }
                         break;
-                    case '*':
-                        parsed.add(e.substring(j, i));
-                        parsed.add(c);
-                        j = i + 1;
-                        break;
                 }
             }
         }
 
-        System.out.print("After Parsing: ");
+        System.out.print("UTILS.JAVA | parseTermsAndSymbols() | After Parsing: ");
         for (Object o : parsed) {
-            System.out.print(o + " | ");
+            System.out.print(o + " \\ ");
         }
         System.out.println();
 
@@ -152,5 +148,14 @@ public class Utils {
         }
 
         return total;
+    }
+
+    public static ArrayList<Term> subList(ArrayList<Term> list, int start, int end) {
+        ArrayList<Term> ret = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            ret.add(list.get(i));
+        }
+
+        return ret;
     }
 }

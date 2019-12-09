@@ -13,32 +13,32 @@ public class Expression {
     // An ArrayList of Term objects implies that they came from an addition/subtraction expression
     // Ex: {3, 2xy, -5z, 6/7} would come from the expression 3 + 2xy - 5z + 6/7
 
-    private ArrayList<Term> terms;
+    private ArrayList<Term> parsedTerms;
 
     public Expression(String e) {
-        terms = new ArrayList<>();
-        System.out.println("Expression: " + e);
+        parsedTerms = new ArrayList<>();
+        System.out.println("EXPRESSION.JAVA | constructor | Expression: " + e);
         simplify(e);
     }
 
     private void simplify(String e) {
-        System.out.println("Simplify: " + e);
+        System.out.println("EXPRESSION.JAVA | simplify() | Simplify: " + e);
 
         // First: simplify parentheses (leave exponents in parentheses)
         HashMap<Integer, Integer> parentheses = parseParentheses(e);
 
         for (int k : parentheses.keySet()) {
-            System.out.println((k + 1) + ", " + parentheses.get(k) + ", " + e.substring(k + 1, parentheses.get(k)));
+            System.out.println("EXPRESSION.JAVA | simplify() | Parenthetical expression and indices: " + (k + 1) + ", " + parentheses.get(k) + ", " + e.substring(k + 1, parentheses.get(k)));
         }
 
         // Simplify inside
         StringBuilder s = new StringBuilder(e);
         for (int k : parentheses.keySet()) {
-            s.replace(k, parentheses.get(k) + 1, new Expression(s.substring(k + 1, parentheses.get(k))).toString()); // TODO REMOVE WHEN BELOW LINE IS UNCOMMENTED
-            // s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k + 1, parentheses.get(k))).toString()); TODO UNCOMMENT
+            // s.replace(k, parentheses.get(k) + 1, new Expression(s.substring(k + 1, parentheses.get(k))).toString()); // TODO REMOVE WHEN BELOW LINE IS UNCOMMENTED
+            s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k + 1, parentheses.get(k))).toString());
         }
 
-        System.out.println("Parentheses simplified: " + s.toString());
+        System.out.println("EXPRESSION.JAVA | simplify() | Parentheses simplified: " + s.toString());
         parentheses = parseParentheses(s.toString());
         // Distribution TODO
         // Find left and right multiplicands and multiply them. Then, multiply that by the expression
@@ -56,13 +56,16 @@ public class Expression {
             String rightDist = scanDistributand(s.toString().substring(end), false);
             rbound = end + rightDist.length();
 
-            s.replace(lbound, rbound, termsToString(distribute(distribute(new Expression(leftDist).getTerms(), new Expression(rightDist).getTerms()), parseTerms(s.substring(start, end)))));
+            System.out.println("EXPRESSION.JAVA | simplify() | lDist, rDist: " + leftDist + ", " + rightDist);
+            ArrayList<Term> leftTerms = (leftDist.isBlank()) ? termToList(Decimal.ONE) : new Expression(leftDist).getTerms();
+            ArrayList<Term> rightTerms = (rightDist.isBlank()) ? termToList(Decimal.ONE) : new Expression(rightDist).getTerms();
+            s.replace(lbound, rbound, termsToString(distribute(distribute(leftTerms, rightTerms), parseTerms(s.substring(start + 1, end)))));
 
             parentheses = parseParentheses(s.toString());
         }
 
         // Second: parse terms
-        System.out.println("Parse Terms: " + s.toString());
+        System.out.println("EXPRESSION.JAVA | simplify() | Parse Terms: " + s.toString());
         ArrayList<Object> parsed = parseTermsAndSymbols(s.toString());
 
         // Third: simplify multiplication and division
@@ -70,55 +73,53 @@ public class Expression {
         // Fourth: simplify addition and subtraction
 
         // parsed = parseTermsAndSymbols(s.toString()); TODO UNCOMMENT
-        System.out.println("Before Addition: " + s.toString());
+        System.out.println("EXPRESSION.JAVA | simplify() | Before Addition: " + s.toString());
         for (Object o : parsed) {
-            if (!o.getClass().equals(Character.class)) terms.add((Term) o);
+            if (!o.getClass().equals(Character.class)) parsedTerms.add((Term) o);
         }
 
         ArrayList<ArrayList<Term>> addLists = new ArrayList<>();
 
         // Sort the terms by their variables
-        for (Term t : terms) {
-            if (addLists.isEmpty()) {
-                ArrayList<Term> newList = new ArrayList<>();
-                newList.add(t);
-                addLists.add(newList);
-            }
-
+        System.out.println("EXPRESSION.JAVA | simplify() | DEBUG 1: " + termsToString(parsedTerms));
+        for (Term t : parsedTerms) {
             ArrayList<ArrayList<Term>> tmp = new ArrayList<>();
-            for (ArrayList<Term> l : addLists) {
-                if (l.get(0).getVariables().equals(t.getVariables())) l.add(t);
-                else {
-                    ArrayList<Term> newList = new ArrayList<>();
-                    newList.add(t);
-                    tmp.add(newList);
+            if (addLists.isEmpty()) addLists.add(termToList(t));
+            else {
+                tmp = new ArrayList<>();
+                for (ArrayList<Term> l : addLists) {
+                    if (l.get(0).getVariables().equals(t.getVariables())) l.add(t);
+                    else tmp.add(termToList(t));
                 }
             }
 
-            addLists.addAll(tmp);
+            if (!tmp.isEmpty()) addLists.addAll(tmp);
         }
-        System.out.println("ADD 1");
+        System.out.println("EXPRESSION.JAVA | simplify() | ADD 1");
 
         // Add lists
         for (ArrayList<Term> l : addLists) {
-            System.out.println(termsToString(l));
+            for (Term t : l) {
+                System.out.println("EXPRESSION.JAVA | simplify() | ADD 1.5: " + t.toString());
+            }
             for (int i = 1; i < l.size(); i++) {
                 l.set(0, add(l.get(0), l.get(i)));
             }
         }
 
-        System.out.println("ADD 2");
+        System.out.println("EXPRESSION.JAVA | simplify() | ADD 2");
 
         // Add terms to term list
-        terms = new ArrayList<>();
+        parsedTerms = new ArrayList<>();
         for (ArrayList<Term> list : addLists) {
-            terms.add(list.get(0));
+            parsedTerms.add(list.get(0));
         }
 
-        System.out.println("AFTER ADDITION: " + termsToString(terms));
+        System.out.println("EXPRESSION.JAVA | simplify() | AFTER ADDITION: " + termsToString(parsedTerms));
     }
 
     private String scanDistributand(String expression, boolean left) {
+        System.out.println("EXPRESSION.JAVA | scanDistributand() | in: " + expression);
         StringBuilder distributand = new StringBuilder("");
 
         for (int i = 0, p = 0; i < expression.length(); i++) {
@@ -161,17 +162,17 @@ public class Expression {
         // Pair matching parentheses
         HashMap<Integer, Integer> parentheses = new HashMap<>();
 
-        System.out.println("INDICES: " + indices.keySet());
+        System.out.println("EXPRESSION.JAVA | parseParentheses() | indices: " + indices.keySet());
         if (indices.isEmpty()) return parentheses; // If the map is empty, don't sort it; just return the empty map
 
         // Sort set
-        Set<Integer> keys = new LinkedHashSet<>();
+        Set<Integer> keys = new HashSet<>();
         Object[] ks = indices.keySet().toArray();
         Arrays.sort(ks);
         for (Object i : ks) {
             keys.add((int) i);
         }
-        System.out.println("Sorted set: " + keys);
+        System.out.println("EXPRESSION.JAVA | parseParentheses() | Sorted set: " + keys);
 
         while (!keys.isEmpty()) {
             int p = 1;
@@ -202,15 +203,16 @@ public class Expression {
             ret.put(k, parentheses.get(k));
         }
 
+        System.out.println("EXPRESSION.JAVA | parseParentheses() | Return: " + ret.keySet());
         return ret;
     }
 
     public ArrayList<Term> getTerms() {
-        return terms;
+        return parsedTerms;
     }
 
     public String toString() {
-        return termsToString(terms);
+        return termsToString(parsedTerms);
     }
 
 }

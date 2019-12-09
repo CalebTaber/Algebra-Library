@@ -30,7 +30,7 @@ public class Decimal extends Term {
     }
 
     private void parse(String e) {
-        System.out.println("Decimal PARSE INPUT: " + e);
+        System.out.println("DECIMAL.JAVA | parse() | input: " + e);
         exponent = new ArrayList<>();
         variables = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class Decimal extends Term {
                         else if (r == ')') {
                             p--;
                             if (p == 0) {
-                                System.out.println("EXPONENT: " + e.substring(i + 3, k));
+                                System.out.println("DECIMAL.JAVA | parse() | exponent: " + e.substring(i + 3, k));
                                 exponent = new Expression(e.substring(i + 2,  k)).getTerms(); // When the end of the exponent is found, simplify it and set the value of exponent
                                 i = k;
                                 j = i + 1; // So that the closing parenthesis is not included in any later parsings
@@ -93,7 +93,7 @@ public class Decimal extends Term {
                         if (r == '(') p++;
                         else if (r == ')') p--;
                         if (p == 0) {
-                            System.out.println("VAR EXPONENT: " + e.substring(i + 3, k));
+                            System.out.println("DECIMAL.JAVA | parse() | variable exponent: " + e.substring(i + 3, k));
                             variables.put(c, new Expression(e.substring(i + 3, k)).getTerms()); // When the end of the exponent is found, add it and the variable to the map
                             i = k;
                             j = i + 1;
