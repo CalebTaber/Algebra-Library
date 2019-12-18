@@ -10,7 +10,7 @@ public abstract class Term {
     }
 
     public static Term toTerm(Object o) {
-        System.out.println("TO TERM: " + o);
+        System.out.println("TERM.JAVA | constructor: " + o);
 
         if (Decimal.isDecimal(o.toString())) return new Decimal(o.toString());
         else if (Fraction.isFraction(o.toString())) return new Fraction(o.toString());
