@@ -1,6 +1,7 @@
 package arithmetic;
 
 import expression.Expression;
+import jdk.jfr.StackTrace;
 import term.Decimal;
 import term.Fraction;
 import term.Term;
@@ -16,6 +17,7 @@ public class Arithmetic {
     public static final String OPERATORS = "+-*/%";
 
     public static Term add(Term addend, Term augend) {
+        System.out.println(addend.toString() + ", " + augend.toString());
         // It is assumed that both terms have the same exponents/variables and that two fractions have the same denominators
         boolean aDec = addend.ID().equals("decimal");
         boolean bDec = augend.ID().equals("decimal");
@@ -37,6 +39,7 @@ public class Arithmetic {
     }
 
     public static Term multiply(Term a, Term b) {
+        System.out.println("ARITHMETIC.JAVA | multiply() | in: " + a.toString() + " \\ " + b.toString());
         boolean aFrac = a.ID().equals("fraction");
         boolean bFrac = b.ID().equals("fraction");
 
@@ -73,7 +76,7 @@ public class Arithmetic {
                     vars = m2.getVariables();
                     vars2 = m1.getVariables();
                 }
-                System.out.println(vars + " | " + m2.getVariables());
+
                 for (int i = 0; i < vars2.size(); i++) {
                     char c = (Character) vars.keySet().toArray()[i];
                     char d = (Character) vars2.keySet().toArray()[i];
@@ -102,6 +105,7 @@ public class Arithmetic {
         else return new Fraction(((Fraction) t).getDenominator(), ((Fraction) t).getNumerator());
     }
 
+    /*
     public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
         System.out.println("DIST IN: " + termsToString(distributors) + " | " + termsToString(distributand));
         ArrayList<Term> distributed = new ArrayList<>();
@@ -113,6 +117,34 @@ public class Arithmetic {
         }
 
         System.out.println(termsToString(distributed));
+        return distributed;
+    }
+    */
+
+    /**
+     * Takes two ArrayLists of Term objects as arguments
+     * Recursively distributes them, so for example (x + 3)(y - 7) would turn into:
+     * distribute({x, 3}, {y,-7})
+     * distribute({x, 3}, {y}) + distribute({x, 3}, {-7})
+     * distribute({x}, {y}) + distribute({3}, {y}) + distribute({x}, {-7}) + distribute({3}, {-7})
+     */
+    public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
+        System.out.println("ARITHMETIC.JAVA | distribute() | in: " + termsToString(distributors) + " \\ " + termsToString(distributand));
+        ArrayList<Term> distributed;
+
+        if (distributand.size() > 1) {
+            distributed = distribute(distributors, termToList(distributand.get(0)));
+            distributed.addAll(distribute(distributors, subList(distributand, 1, distributand.size())));
+        } else {
+            if (distributors.size() > 1) {
+                distributed = distribute(termToList(distributors.get(0)), distributand);
+                distributed.addAll(distribute(subList(distributors, 1, distributors.size()), distributand));
+            } else {
+                distributed = termToList(multiply(distributors.get(0), distributand.get(0)));
+            }
+        }
+
+        System.out.println("ARITHMETIC.JAVA | distribute() | out: " + termsToString(distributed));
         return distributed;
     }
 
