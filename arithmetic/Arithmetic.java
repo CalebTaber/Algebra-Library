@@ -62,7 +62,7 @@ public class Arithmetic {
 
             // Exponent math
             ArrayList<Term> exponent = new ArrayList<>();
-            if (m1.getValue().equals(m2.getValue())) exponent = new Expression("(" + termsToString(m1.getExponent()) + ")+(" + termsToString(m2.getExponent()) + ")").getTerms();
+            if (m1.getValue().equals(m2.getValue()) && (!m1.getExponent().isEmpty() || !m2.getExponent().isEmpty())) exponent = new Expression("(" + termsToString(m1.getExponent()) + ")+(" + termsToString(m2.getExponent()) + ")").getTerms();
 
             // Multiply variables
             HashMap<Character, ArrayList<Term>> vars = new HashMap<>();

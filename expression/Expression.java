@@ -166,18 +166,22 @@ public class Expression {
         if (indices.isEmpty()) return parentheses; // If the map is empty, don't sort it; just return the empty map
 
         // Sort set
-        Set<Integer> keys = new HashSet<>();
-        Object[] ks = indices.keySet().toArray();
-        Arrays.sort(ks);
-        for (Object i : ks) {
-            keys.add((int) i);
+        ArrayList<Integer> keys = new ArrayList<>();
+        int[] ks = new int[indices.keySet().size()];
+        for (int i = 0; i < indices.keySet().size(); i++) {
+            ks[i] = (int) indices.keySet().toArray()[i];
         }
-        System.out.println("EXPRESSION.JAVA | parseParentheses() | Sorted set: " + keys);
+        Arrays.sort(ks);
+        System.out.println(Arrays.toString(ks));
+        for (int i : ks) {
+            keys.add(i);
+        }
+        System.out.println("EXPRESSION.JAVA | parseParentheses() | Sorted array: " + keys);
 
         while (!keys.isEmpty()) {
             int p = 1;
             for (int i = 1; i < keys.size(); i++) {
-                int k = (int) keys.toArray()[i];
+                int k = keys.get(i);
                 boolean isOpen = indices.get(k) == '(';
 
                 if (isOpen) p++;
@@ -185,8 +189,8 @@ public class Expression {
 
                 if (p == 0) { // When the closing parenthesis is found
                     parentheses.put((int) keys.toArray()[0], k); // Add the opening and closing indices
-                    keys.remove(k); // Remove k first, because removing index 0 will shift the array
-                    keys.remove(keys.toArray()[0]);
+                    keys.remove(i); // Remove k first, because removing index 0 will shift the array
+                    keys.remove(0);
                     break;
                 }
             }
