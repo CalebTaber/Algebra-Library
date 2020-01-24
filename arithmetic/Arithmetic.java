@@ -1,7 +1,6 @@
 package arithmetic;
 
 import expression.Expression;
-import jdk.jfr.StackTrace;
 import term.Decimal;
 import term.Fraction;
 import term.Term;
@@ -105,42 +104,15 @@ public class Arithmetic {
         else return new Fraction(((Fraction) t).getDenominator(), ((Fraction) t).getNumerator());
     }
 
-    /*
-    public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
-        System.out.println("DIST IN: " + termsToString(distributors) + " | " + termsToString(distributand));
+    public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributands) {
+        System.out.println("ARITHMETIC.JAVA | distribute() | in: " + termsToString(distributors) + " \\ " + termsToString(distributands));
         ArrayList<Term> distributed = new ArrayList<>();
 
-        for (int i = 0; i < distributors.size(); i++) {
-            for (int o = 0; o < distributand.size(); o++) {
-                distributed.add(multiply(distributors.get(i), distributand.get(o)));
-            }
-        }
-
-        System.out.println(termsToString(distributed));
-        return distributed;
-    }
-    */
-
-    /**
-     * Takes two ArrayLists of Term objects as arguments
-     * Recursively distributes them, so for example (x + 3)(y - 7) would turn into:
-     * distribute({x, 3}, {y,-7})
-     * distribute({x, 3}, {y}) + distribute({x, 3}, {-7})
-     * distribute({x}, {y}) + distribute({3}, {y}) + distribute({x}, {-7}) + distribute({3}, {-7})
-     */
-    public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributand) {
-        System.out.println("ARITHMETIC.JAVA | distribute() | in: " + termsToString(distributors) + " \\ " + termsToString(distributand));
-        ArrayList<Term> distributed;
-
-        if (distributand.size() > 1) {
-            distributed = distribute(distributors, termToList(distributand.get(0)));
-            distributed.addAll(distribute(distributors, subList(distributand, 1, distributand.size())));
-        } else {
-            if (distributors.size() > 1) {
-                distributed = distribute(termToList(distributors.get(0)), distributand);
-                distributed.addAll(distribute(subList(distributors, 1, distributors.size()), distributand));
-            } else {
-                distributed = termToList(multiply(distributors.get(0), distributand.get(0)));
+        for (Term distributor : distributors) {
+            for (Term distributand : distributands) {
+                System.out.println("ARITHMETIC.JAVA | distribute() | distributor: " + distributor.toString());
+                System.out.println("ARITHMETIC.JAVA | distribute() | distributand: " + distributand.toString());
+                distributed.add(multiply(distributor, distributand));
             }
         }
 

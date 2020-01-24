@@ -53,8 +53,8 @@ public class Expression {
             String leftDist = scanDistributand(leftDistSB.toString(), true);
             lbound = start - leftDist.length();
 
-            String rightDist = scanDistributand(s.toString().substring(end), false);
-            rbound = end + rightDist.length();
+            String rightDist = scanDistributand(s.toString().substring(end + 1), false);
+            rbound = end + rightDist.length() + 1; // Add 1 so that the closing parenthesis is replaced in the following lines
 
             System.out.println("EXPRESSION.JAVA | simplify() | lDist, rDist: " + leftDist + ", " + rightDist);
             ArrayList<Term> leftTerms = (leftDist.isBlank()) ? termToList(Decimal.ONE) : new Expression(leftDist).getTerms();

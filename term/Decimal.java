@@ -5,6 +5,7 @@ import expression.Expression;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import static utils.Utils.*;
 
@@ -149,7 +150,19 @@ public class Decimal extends Term {
     }
 
     public HashMap<Character, ArrayList<Term>> getVariables() {
-        return variables;
+        HashMap<Character, ArrayList<Term>> ret = new HashMap<>();
+        Iterator<Character> iter = variables.keySet().iterator();
+        char c = ' ';
+        if (iter.hasNext()) {
+            c = iter.next();
+            ret.put(c, variables.get(c));
+        }
+
+        return ret;
+    }
+
+    public static Decimal copy(Decimal copy) {
+        return new Decimal(copy.getValue(), copy.getExponent(), copy.getVariables());
     }
 
     public String ID() {
