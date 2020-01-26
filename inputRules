@@ -1,0 +1,8 @@
+1. Opening and closing parentheses must be equal
+2. There can never be more closing parentheses than opening
+3. Two or more of the same operator cannot be adjacent, except subtraction symbols, which can occur twice
+4. Acceptable characters = "0123456789abcdefghijklmnopqrstuvwxyz.^()+-*/=!"
+5. Two or more decimal points cannot be adjacent
+6. The first character cannot be an operator, except if it is a negation symbol
+7. operators = "+-/*^"
+8. Valid operator combinations = "+-", "--", "*-", "/-", "^-", "!-", "=-", "-.", "!="
