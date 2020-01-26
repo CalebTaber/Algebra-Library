@@ -1,5 +1,6 @@
 package debug;
 
+import exception.MalformedExpressionException;
 import expression.Expression;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -8,8 +9,41 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Main /*extends Application*/ {
 
+    public static void main(String[] args) {
+        String[] exps = {
+                "2 + 7",
+                "2x - 7^42",
+                "-2 + -7",
+                "2 - -7z^(1)",
+                "-2^(1) + 1 + 7",
+                "-9x(4y^5*6)",
+                "2*3-9x(4y^5/6)+7x^2y^(.5)/8^3-1"
+        };
+
+        String[] ans = {
+                "2^(1)+7^(1)",
+                "2^(1)x^(1)-7^(42^(1))",
+                "-2^(1)-7^(1)",
+                "2^(1)+7^(1)z^(1)",
+                "-2^(1)+1+7^(1)",
+                "-9^(1)x^(1)(4^(1)y^(5^(1))*6^(1))",
+                "2^(1)*3^(1)-9^(1)x^(1)(4^(1)y^(5^(1))/6^(1))+7^(1)x^(2^(1))y^(.5^(1))/8^(3^(1))-1"
+        };
+
+        try {
+            for (int i = 0; i < exps.length; i++) {
+                String x = Expression.format(exps[i]);
+                System.out.println(x + "\t" + x.equals(ans[i]));
+            }
+            // System.out.println(Expression.format("2 + 7^(+)"));
+        } catch (MalformedExpressionException e) {
+            e.printStackTrace();
+        }
+    }
+
+/*
     public void start(Stage window) {
         window = new Stage();
         Pane root = new Pane();
@@ -23,7 +57,7 @@ public class Main extends Application {
         input.setPrefWidth(window.getWidth());
         scene.setOnKeyPressed(e -> {
             String i = input.getText().replaceAll(" ", "");
-            if (e.getCode() == KeyCode.ENTER && isValidInput(i)) {
+            if (e.getCode() == KeyCode.ENTER) {
                 new Expression(i);
             }
         });
@@ -31,9 +65,5 @@ public class Main extends Application {
         root.getChildren().add(input);
         window.show();
     }
-
-    private boolean isValidInput(String input) {
-        return true;
-    }
-
+    */
 }
