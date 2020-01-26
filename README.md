@@ -1,4 +1,4 @@
-A library of algebraic methods, written in Java.
+<title>A library of algebraic methods, written in Java.</title>
 
 <h1>Goal</h1>
 The end-goal of this project is to build a library that can solve systems of equations of varying degrees. I also would like to build in functionality for graphing equations, but that may be included in a different project since this library is centered around the solving of mathematical expressions, not necessarily their representations.
