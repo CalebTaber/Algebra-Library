@@ -10,6 +10,6 @@ The current state of the project is the expression phase. Right now, a new forma
 The next step after completing the expression phase is to implement functionality for solving linear equations. This should be relatively straightforward, as it only involves linking two expressions together.
 
 <h2>Planned Features</h2>
-- Solving linear equations/inequalities
-- Solving systems of linear equations/inequalities
-- Suport for trigonometric functions
+-Solving linear equations/inequalities
+-Solving systems of linear equations/inequalities
+-Suport for trigonometric functions
