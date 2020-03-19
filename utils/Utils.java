@@ -1,5 +1,8 @@
 package utils;
 
+import exception.EmptyInputException;
+import exception.MalformedExpressionException;
+import expression.Expression;
 import term.Decimal;
 import term.Fraction;
 import term.Term;
@@ -28,6 +31,27 @@ public class Utils {
         return s.toString();
     }
 
+    /**
+     * Parses the first parenthetical from the given expression.
+     * Note: the expression must begin with an opening parenthesis
+     * @param expression the expression from which to parse a parenthetical
+     * @return the parsed parenthetical as a String
+     */
+    public static String parseParenthetical(String expression) {
+        for (int i = 1, p = 1; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+
+            if (c == '(') p++;
+            else if (c == ')') {
+                p--;
+                if (p == 0) // When p == 0, that signals the end of the parenthetical since the number of opening and the number of closing parentheses are equal
+                    return expression.substring(1, i);
+            }
+        }
+
+        return null;
+    }
+
     /** Returns a list containing the given term **/
     public static ArrayList<Term> termToList(Term t) {
         ArrayList<Term> list = new ArrayList<>();
@@ -35,16 +59,45 @@ public class Utils {
         return list;
     }
 
-    /** Returns list of terms in the string without the arithmetic symbols **/
-    public static ArrayList<Term> parseTerms(String e) {
-        ArrayList<Object> list = parseTermsAndSymbols(e);
-        ArrayList<Term> ret = new ArrayList<>();
+    /**
+     * Parses the Terms not inside parentheticals from the given expression
+     * @param expression = The expression from which to parse the Terms
+     * @return An ArrayList<Term> of Terms in the expression
+     * @throws Exception if a parsed Term is not a valid Decimal or Fraction
+     * @throws EmptyInputException if the given expression String is empty
+     */
+    public static ArrayList<Term> parseTerms(String expression) throws Exception {
+        if (expression.isEmpty()) throw new EmptyInputException();
+        ArrayList<Term> parsed = new ArrayList<>();
 
-        for (Object o : list) {
-            if (!o.getClass().equals(Character.class)) ret.add(toTerm(o));
+        for (int i = 0, j = 0, p = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+
+            if (c == '(') p++;
+            else if (c == ')') p--;
+
+            if (p == 0 && j != i) { // Make sure that the terms in exponents are not parsed separately from their numerical/variable parts
+
+                if (atEnd(i, expression)) { // If the end of the String has been reached
+                    String t = expression.substring(j, i + 1); // Parse the string
+                    if (Decimal.isDecimal(t)) parsed.add(new Decimal(t)); // Determine if Decimal
+                    else if (Fraction.isFraction(t)) parsed.add(new Fraction(t)); // Determine if Fraction
+                    else throw new Exception("This term does not have a type"); // If it doesn't fit in either category (it should), throw an Exception
+                }
+
+                if (c == '*' || c == '/' || c == '+') { // When an operator is encountered
+                    String t = expression.substring(j, i); // Parse the string
+                    if (Decimal.isDecimal(t)) parsed.add(new Decimal(t)); // Determine if Decimal
+                    else if (Fraction.isFraction(t)) parsed.add(new Fraction(t)); // Determine if Fraction
+                    else throw new Exception("This term does not have a type"); // If it doesn't fit in either category (it should), throw an Exception
+
+                    j = i + 1; // Set j one char ahead of i so that it does not parse the operator with the next term
+                    i++; // Increment i so that it is one character ahead of j on the next iteration
+                }
+            }
         }
 
-        return ret;
+        return parsed;
     }
 
     /** Returns a list of indices of the given character in the given string **/
@@ -58,54 +111,24 @@ public class Utils {
         return indices;
     }
 
-    /** Returns a list of terms and arithmetic symbols in the given string **/
-    public static ArrayList<Object> parseTermsAndSymbols(String e) {
-        ArrayList<Object> parsed = new ArrayList<>();
+    /**
+     * Parses the operators not inside parentheticals in the given expression
+     * @param expression = The expression from which to parse the operators
+     * @return An ArrayList<Character> of operators in the given expression
+     * @throws EmptyInputException If the input String is empty since the input should never be an empty String
+     */
+    public static ArrayList<Character> parseOperators(String expression) throws EmptyInputException {
+        if (expression.isEmpty()) throw new EmptyInputException();
+        ArrayList<Character> parsed = new ArrayList<>();
 
-        for (int i = 0, j = 0, p = 0; i < e.length(); i++) {
-            char c = e.charAt(i);
+        int p = 0;
+        for (char c : expression.toCharArray()) {
 
             if (c == '(') p++;
             else if (c == ')') p--;
 
-            if (p == 0) { // Make sure that the exponent of a term is not parsed separately
-                if (atEnd(i, e)) parsed.add(e.substring(j)); // If the end of the string is reached, add the final term to the list
-
-                // Parse the terms when an arithmetic operator is encountered
-                switch (c) {
-                    case '*':
-                    case '+':
-                        parsed.add(e.substring(j, i));
-                        parsed.add(c);
-                        j = i + 1;
-                        break;
-                    case '-':
-                        if (i == 0) break; // If the subtraction symbol begins the expression (-5), it will try to parse the '-' as a term, so break to avoid that
-
-                        if (e.charAt(i + 1) == '-') { // If there is an instance such as 12--3x, add a plus sign and move past the subtraction symbols
-                            parsed.add(e.substring(j, i));
-                            parsed.add('+');
-                            i++; // Increment by one, because the loop will add one to i so that it can move past the double negative (5--2)
-                            j = i;
-                        } else { // If there is only a single subtraction symbol
-                            parsed.add(e.substring(j, i));
-                            parsed.add('+');
-                            j = i; // Do not move j past i, because the subtraction symbol will be included in the next term
-                        }
-                        break;
-                }
-            }
-        }
-
-        System.out.print("UTILS.JAVA | parseTermsAndSymbols() | After Parsing: ");
-        for (Object o : parsed) {
-            System.out.print(o + " \\ ");
-        }
-        System.out.println();
-
-        // Determine whether or not a term is a decimal or fraction
-        for (Object o : parsed) {
-            if (o.getClass() == String.class) parsed.set(parsed.indexOf(o), toTerm(o));
+            if (p == 0 && (c == '*' || c == '/' || c == '+'))
+                parsed.add(c); // If an operator is encountered outside of any parentheticals
         }
 
         return parsed;

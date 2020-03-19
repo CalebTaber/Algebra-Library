@@ -14,11 +14,10 @@ public class Expression {
     // An ArrayList of Term objects implies that they came from an addition/subtraction expression
     // Ex: {3, 2xy, -5z, 6/7} would come from the expression 3 + 2xy - 5z + 6/7
 
-    private ArrayList<Term> parsedTerms;
+    private ArrayList<Term> terms;
 
     public Expression(String e) {
-        parsedTerms = new ArrayList<>();
-        System.out.println("EXPRESSION.JAVA | constructor | Expression: " + e);
+        terms = new ArrayList<>();
         simplify(e);
     }
 
@@ -27,24 +26,18 @@ public class Expression {
      * All expressions entered will first be formatted so that parsing is straightforward and consistent. If an input expression cannot
      * be formatted, a malformedExpressionException will be thrown in Expression.format()
      *
-     * @param e = An input expression
+     * @param input = An input expression
      */
-    private void simplify(String e) {
+    private void simplify(String input) {
         String formatted = null;
         try {
-            formatted = format(e);
-        } catch (MalformedExpressionException ex) {
-            ex.printStackTrace();
+            formatted = format(input);
+        } catch (MalformedExpressionException e) {
+            e.printStackTrace();
         }
-
-        System.out.println("EXPRESSION.JAVA | simplify() | Simplify: " + formatted);
 
         // First: simplify parentheses (leave exponents in parentheses)
         HashMap<Integer, Integer> parentheses = parseParentheses(formatted);
-
-        for (int k : parentheses.keySet()) {
-            System.out.println("EXPRESSION.JAVA | simplify() | Parenthetical expression and indices: " + (k + 1) + ", " + parentheses.get(k) + ", " + formatted.substring(k + 1, parentheses.get(k)));
-        }
 
         // Simplify inside
         StringBuilder s = new StringBuilder(formatted);
@@ -53,7 +46,6 @@ public class Expression {
             s.replace(k + 1, parentheses.get(k), new Expression(s.substring(k + 1, parentheses.get(k))).toString());
         }
 
-        System.out.println("EXPRESSION.JAVA | simplify() | Parentheses simplified: " + s.toString());
         parentheses = parseParentheses(s.toString());
         // Distribution TODO
         // Find left and right multiplicands and multiply them. Then, multiply that by the expression
@@ -71,27 +63,31 @@ public class Expression {
             String rightDist = scanDistributand(s.toString().substring(end + 1), false);
             rbound = end + rightDist.length() + 1; // Add 1 so that the closing parenthesis is replaced in the following lines
 
-            System.out.println("EXPRESSION.JAVA | simplify() | lDist, rDist: " + leftDist + ", " + rightDist);
             ArrayList<Term> leftTerms = (leftDist.isBlank()) ? termToList(Decimal.ONE) : new Expression(leftDist).getTerms();
             ArrayList<Term> rightTerms = (rightDist.isBlank()) ? termToList(Decimal.ONE) : new Expression(rightDist).getTerms();
-            s.replace(lbound, rbound, termsToString(distribute(distribute(leftTerms, rightTerms), parseTerms(s.substring(start + 1, end)))));
+            try {
+                s.replace(lbound, rbound, termsToString(distribute(distribute(leftTerms, rightTerms), parseTerms(s.substring(start + 1, end)))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             parentheses = parseParentheses(s.toString());
         }
 
         // Second: parse terms
-        System.out.println("EXPRESSION.JAVA | simplify() | Parse Terms: " + s.toString());
-        ArrayList<Object> parsed = parseTermsAndSymbols(s.toString());
-
+        ArrayList<Term> parsedTerms = null;
+        ArrayList<Character> parsedOperators = null;
+        try {
+            parsedTerms = parseTerms(s.toString());
+            parsedOperators = parseOperators(s.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // Third: simplify multiplication and division
 
         // Fourth: simplify addition and subtraction
 
         // parsed = parseTermsAndSymbols(s.toString()); TODO UNCOMMENT
-        System.out.println("EXPRESSION.JAVA | simplify() | Before Addition: " + s.toString());
-        for (Object o : parsed) {
-            if (!o.getClass().equals(Character.class)) parsedTerms.add((Term) o);
-        }
 
         ArrayList<ArrayList<Term>> addLists = new ArrayList<>();
 
@@ -122,12 +118,9 @@ public class Expression {
         for (ArrayList<Term> list : addLists) {
             parsedTerms.add(list.get(0));
         }
-
-        System.out.println("EXPRESSION.JAVA | simplify() | AFTER ADDITION: " + termsToString(parsedTerms));
     }
 
     private String scanDistributand(String expression, boolean left) {
-        System.out.println("EXPRESSION.JAVA | scanDistributand() | in: " + expression);
         StringBuilder distributand = new StringBuilder("");
 
         for (int i = 0, p = 0; i < expression.length(); i++) {
@@ -172,7 +165,6 @@ public class Expression {
         // Pair matching parentheses
         HashMap<Integer, Integer> parentheses = new HashMap<>();
 
-        System.out.println("EXPRESSION.JAVA | parseParentheses() | indices: " + indices.keySet());
         if (indices.isEmpty()) return parentheses; // If the map is empty, don't sort it; just return the empty map
 
         // Sort set
@@ -182,11 +174,9 @@ public class Expression {
             ks[i] = (int) indices.keySet().toArray()[i];
         }
         Arrays.sort(ks);
-        System.out.println(Arrays.toString(ks));
         for (int i : ks) {
             keys.add(i);
         }
-        System.out.println("EXPRESSION.JAVA | parseParentheses() | Sorted array: " + keys);
 
         while (!keys.isEmpty()) {
             int p = 1;
@@ -218,12 +208,11 @@ public class Expression {
             ret.put(k, parentheses.get(k));
         }
 
-        System.out.println("EXPRESSION.JAVA | parseParentheses() | Return: " + ret.keySet());
         return ret;
     }
 
     public ArrayList<Term> getTerms() {
-        return parsedTerms;
+        return terms;
     }
 
     /**
@@ -307,6 +296,11 @@ public class Expression {
         expression = expression.replace("]", ")");
 
         StringBuilder formatted = new StringBuilder(expression);
+        if (expression.length() == 1) {
+            if (Character.isAlphabetic(expression.charAt(0)) || (Character.isDigit(expression.charAt(0)) && Integer.parseInt(expression) != 1))
+                formatted.insert(1, "^(1)"); // If the expression is a single number (not 1) or a single variable
+        }
+
         for (int i = 1, offset = 0, numStart = -1; i < expression.length(); i++) { // Offset == insertion offset for formatted
             char a = expression.charAt(i - 1);
             char b = expression.charAt(i);
@@ -333,6 +327,8 @@ public class Expression {
                     formatted.insert(i + offset + 1, "^(1)");
                 else if (!isOne && (Character.isAlphabetic(a) || Character.isDigit(a) && b ==')')) // If there is a number at the end of a parenthetical that ends the expression Ex: ...+6)
                     formatted.insert(i + offset, "^(1)");
+                else if (Character.isAlphabetic(b)) // If a variable ends the expression
+                    formatted.insert(i + offset + 1, "^(1)");
             } else if ((Character.isDigit(a) && !Character.isDigit(b) && b != '.') || Character.isAlphabetic(a)) { // If at the end of a number OR at the char after a variable
                 // If there is no explicit exponent, add 1 as the exponent
                 if (b == '^') continue;
@@ -384,7 +380,7 @@ public class Expression {
     }
 
     public String toString() {
-        return termsToString(parsedTerms);
+        return termsToString(terms);
     }
 
 }

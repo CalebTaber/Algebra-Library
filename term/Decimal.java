@@ -11,25 +11,68 @@ import static utils.Utils.*;
 
 public class Decimal extends Term {
 
-    public static final Decimal ERROR = new Decimal(String.valueOf(Integer.MAX_VALUE)); // Used as a return value when no other return cases are met
-    public static final Decimal NEG_ONE = new Decimal("-1");
-    public static final Decimal ZERO = new Decimal("0");
-    public static final Decimal ONE = new Decimal("1");
+    public static final Decimal NEG_ONE = new Decimal(new BigDecimal(-1), Decimal.ONE, null);
+    public static final Decimal ZERO = new Decimal(BigDecimal.ZERO, Decimal.ONE, null);
+    public static final Decimal ONE = new Decimal(BigDecimal.ONE, (Term) null, null);
 
     private BigDecimal value;
     private ArrayList<Term> exponent;
     private HashMap<Character, ArrayList<Term>> variables;
 
+    public Decimal(BigDecimal val, Term exp, HashMap<Character, ArrayList<Term>> vars) {
+        if (val == null) throw new NullPointerException("Cannot pass null BigDecimal into the value of a Decimal");
+
+        value = val;
+        exponent = (exp == null) ? null : termToList(exp);
+        variables = new HashMap<>();
+
+        if (vars != null) {
+            for (char c : vars.keySet()) {
+                variables.put(c, vars.get(c));
+            }
+        }
+    }
+
     public Decimal(BigDecimal val, ArrayList<Term> exp, HashMap<Character, ArrayList<Term>> vars) {
+        if (val == null) throw new NullPointerException("Cannot pass null BigDecimal into the value of a Decimal");
+
         value = val;
         exponent = exp;
-        variables = vars;
+
+        if (vars != null) {
+            for (char c : vars.keySet()) {
+                variables.put(c, vars.get(c));
+            }
+        }
     }
 
     public Decimal(String e) {
         parse(e);
     }
 
+    private void parse(String decimal) {
+        if (decimal.startsWith("-") && Character.isAlphabetic(decimal.charAt(1)))
+                value = new BigDecimal(-1); // If the term's numerical value is -1, but the 1 is omitted
+        else {
+            if (Character.isAlphabetic(decimal.charAt(0)))
+                value = BigDecimal.ONE; // If the term's numerical value is 1, but the 1 is omitted
+            else if (Character.isDigit(decimal.charAt(0)))
+                value = new BigDecimal(decimal.substring(0, decimal.indexOf("^"))); // If the term's numerical value is longer than one character
+        }
+
+        decimal = decimal.substring(decimal.indexOf("^") + 1); // Delete the numerical value from the String
+        String exp = parseParenthetical(decimal);
+        exponent = (exp.length() == 1) ? termToList(Decimal.ONE) : new Expression(exp).getTerms();
+        decimal = decimal.substring(exp.length() + 2); // Add 2 to account for the opening and closing parentheses
+
+        while (!decimal.isEmpty()) {
+            String tmp = parseParenthetical(decimal.substring(2)); // Start at index 2 so that the variable and the carat are skipped over
+            variables.put(decimal.charAt(0), new Expression(tmp).getTerms());
+            decimal = decimal.substring(tmp.length() + 4); // Add 4 to account for the variable, carat, and opening/closing parentheses
+        }
+    }
+
+    /*
     private void parse(String e) {
         System.out.println("DECIMAL.JAVA | parse() | input: " + e);
         exponent = new ArrayList<>();
@@ -114,6 +157,7 @@ public class Decimal extends Term {
             }
         }
     }
+    */
 
     public static boolean isDecimal(String e) {
         for (int i = 0, p = 0; i < e.length(); i++) {
@@ -131,8 +175,8 @@ public class Decimal extends Term {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append(value.toString()); // Add value
-        if (!exponent.isEmpty()) s.append("^(").append(termsToString(exponent)).append(")"); // Add exponent
-        if (!variables.isEmpty()) { // Add variables
+        if (exponent != null) s.append("^(").append(termsToString(exponent)).append(")"); // Add exponent
+        if (variables != null) { // Add variables
             for (char c : variables.keySet()) {
                 s.append(c).append("^(").append(termsToString(variables.get(c))).append(")");
             }
@@ -150,6 +194,7 @@ public class Decimal extends Term {
     }
 
     public HashMap<Character, ArrayList<Term>> getVariables() {
+        if (variables == null) return new HashMap<>();
         HashMap<Character, ArrayList<Term>> ret = new HashMap<>();
         Iterator<Character> iter = variables.keySet().iterator();
         char c = ' ';
@@ -159,10 +204,6 @@ public class Decimal extends Term {
         }
 
         return ret;
-    }
-
-    public static Decimal copy(Decimal copy) {
-        return new Decimal(copy.getValue(), copy.getExponent(), copy.getVariables());
     }
 
     public String ID() {

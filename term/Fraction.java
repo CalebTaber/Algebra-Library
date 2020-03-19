@@ -21,7 +21,6 @@ public class Fraction extends Term {
 
     private void parse(String e) {
         // Find middle division symbol
-        System.out.println("Fraction PARSE INPUT: " + e);
         ArrayList<Integer> div = indicesOf(e, '/');
         int d = div.size() / 2;
         // Parse numerator and denominator, and simplify them
@@ -30,8 +29,12 @@ public class Fraction extends Term {
 
         // Check if compound fraction   (3x+2)/7 OR 3x/(7-y)
         if (div.size() == 1 && (e.contains("+") || (e.substring(1).contains("-")))) { // If there is one division symbol and there is addition or subtraction
-            numerator = parseTerms(num);
-            denominator = parseTerms(denom);
+            try {
+                numerator = parseTerms(num);
+                denominator = parseTerms(denom);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         } else { // If it is a complex fraction OR a simple fraction
             // Set numerator and denominator
             this.numerator = (isFraction(num)) ? termToList(new Fraction(num)) : termToList(new Decimal(num));

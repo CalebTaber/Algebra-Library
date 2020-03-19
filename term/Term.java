@@ -15,7 +15,7 @@ public abstract class Term {
         if (Decimal.isDecimal(o.toString())) return new Decimal(o.toString());
         else if (Fraction.isFraction(o.toString())) return new Fraction(o.toString());
 
-        return Decimal.ERROR;
+        return Decimal.ZERO;
     }
 
     public HashMap<Character, ArrayList<Term>> getVariables() {

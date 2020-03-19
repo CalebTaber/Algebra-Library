@@ -16,7 +16,7 @@ public class Arithmetic {
     public static final String OPERATORS = "+-*/%";
 
     public static Term add(Term addend, Term augend) {
-        System.out.println(addend.toString() + ", " + augend.toString());
+        System.out.println("TERM.ADD: " + addend.toString() + ", " + augend.toString());
         // It is assumed that both terms have the same exponents/variables and that two fractions have the same denominators
         boolean aDec = addend.ID().equals("decimal");
         boolean bDec = augend.ID().equals("decimal");
@@ -34,11 +34,10 @@ public class Arithmetic {
             }
         }
 
-        return Decimal.ERROR;
+        return Decimal.ZERO;
     }
 
     public static Term multiply(Term a, Term b) {
-        System.out.println("ARITHMETIC.JAVA | multiply() | in: " + a.toString() + " \\ " + b.toString());
         boolean aFrac = a.ID().equals("fraction");
         boolean bFrac = b.ID().equals("fraction");
 
@@ -92,7 +91,7 @@ public class Arithmetic {
             return new Fraction(numerator, denominator);
         }
 
-        return Decimal.ERROR;
+        return Decimal.ZERO;
     }
 
     public static Term divide(Term dividend, Term divisor) {
@@ -105,18 +104,14 @@ public class Arithmetic {
     }
 
     public static ArrayList<Term> distribute(ArrayList<Term> distributors, ArrayList<Term> distributands) {
-        System.out.println("ARITHMETIC.JAVA | distribute() | in: " + termsToString(distributors) + " \\ " + termsToString(distributands));
         ArrayList<Term> distributed = new ArrayList<>();
 
         for (Term distributor : distributors) {
             for (Term distributand : distributands) {
-                System.out.println("ARITHMETIC.JAVA | distribute() | distributor: " + distributor.toString());
-                System.out.println("ARITHMETIC.JAVA | distribute() | distributand: " + distributand.toString());
                 distributed.add(multiply(distributor, distributand));
             }
         }
 
-        System.out.println("ARITHMETIC.JAVA | distribute() | out: " + termsToString(distributed));
         return distributed;
     }
 
@@ -134,7 +129,7 @@ public class Arithmetic {
             else return distribute(dOne, dTwo);
         }
 
-        return termToList(Decimal.ERROR);
+        return termToList(Decimal.ZERO);
     }
 
     public static int compare(Term a, Term b) {
